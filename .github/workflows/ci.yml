@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Syntax + secret scan + smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Python syntax check
+        run: |
+          python -m py_compile scripts/feishu_card.py scripts/apply_feishu_card_patch.py
+
+      - name: Secret scan (API keys / tokens)
+        run: |
+          set -e
+          # 常见密钥模式扫描：app_id / app_secret / token / 私钥
+          if grep -rEn --exclude-dir=.git --exclude=ci.yml \
+              '(cli_[A-Za-z0-9]{32}|sk-[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|FEISHU_APP_SECRET\s*=\s*[A-Za-z0-9]{8,})' .; then
+            echo "::error::Possible secret found in repository!"
+            exit 1
+          fi
+          echo "✅ No secrets detected"
+
+      - name: Smoke test (card builder)
+        run: |
+          python -c "
+import sys
+sys.path.insert(0, 'scripts')
+import feishu_card
+card = feishu_card.markdown_to_card('| A | B |\n|:--|:--|\n| 1 | 2 |')
+assert card['schema'] == '2.0', 'schema must be 2.0'
+assert card['body']['elements'][0]['tag'] == 'markdown'
+task = feishu_card.task_card('进行中')
+assert '进行中' in task['body']['elements'][0]['content']
+print('✅ card builder smoke test passed')
+"
