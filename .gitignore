@@ -1,0 +1,7 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行产物（本工具运行时会生成）
+last_message_id.txt
