@@ -1,36 +1,25 @@
-# Security Policy · 安全策略
+# 安全策略
 
-## Supported Versions · 支持的版本
+## 支持的版本
 
-**EN** Only the latest release is supported. Security fixes are released for the current `main` branch and tagged releases.
+仅维护最新发布版本。安全修复会发布到当前 `main` 分支及对应 tag。
 
-**中文** 仅维护最新发布版本。安全修复会发布到当前 `main` 分支及对应 tag。
-
-| Version · 版本 | Supported · 支持 |
+| 版本 | 支持 |
 |:----|:----|
-| latest (v1.0.0+) · 最新版 | ✅ |
+| 最新版（v1.0.0+） | ✅ |
 
-## Reporting a Vulnerability · 报告漏洞
+## 报告漏洞
 
-**EN** Please **do not open a public issue** for security problems. Instead, report privately:
+发现安全问题**请不要开公开 Issue**，请私下报告：
 
-**中文** 发现安全问题**请不要开公开 Issue**，请私下报告：
+- GitHub Security Advisory（推荐）：https://github.com/cmfok/hermes-feishu-card/security/advisories/new
 
-- **EN** GitHub Security Advisory (preferred): https://github.com/cmfok/hermes-feishu-card/security/advisories/new
-- **中文** GitHub Security Advisory（推荐）：https://github.com/cmfok/hermes-feishu-card/security/advisories/new
+我们会在 7 天内回复评估结论。确认后尽快发布修复，并在修复发布后公开披露。
 
-**EN** We aim to respond within 7 days with a triage assessment. Once confirmed, a fix will be released as soon as possible and the issue will be disclosed after the fix ships.
+## 范围
 
-**中文** 我们会在 7 天内回复评估结论。确认后尽快发布修复，并在修复发布后公开披露。
+本项目零运行时依赖（仅 Python 标准库）。凭证一律从环境变量 / `.env` 读取，脚本不会存储任何密钥。
 
-## Scope · 范围
+## CI 中的安全检查
 
-**EN** This project has zero runtime dependencies (Python stdlib only). Credentials are read from environment variables / `.env` and are never stored by the scripts.
-
-**中文** 本项目零运行时依赖（仅 Python 标准库）。凭证一律从环境变量 / `.env` 读取，脚本不会存储任何密钥。
-
-## Security Checks in CI · CI 中的安全检查
-
-**EN** Every push runs a secret scan (API key / token patterns) and a Python syntax check via GitHub Actions.
-
-**中文** 每次推送都会通过 GitHub Actions 运行密钥扫描（API key / token 模式）和 Python 语法检查。
+每次推送都会通过 GitHub Actions 运行密钥扫描（API key / token 模式）和 Python 语法检查。
