@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行产物（本工具运行时会生成）
+last_message_id.txt
+
+# 敏感文件（任何环境）
+.env
+.env.*
+*.env
+!*.example
+
+# 本地安全工具状态（不入库）
+.mimosa/
