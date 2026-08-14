@@ -1,6 +1,6 @@
 # 🤖 Hermes Feishu Card Mode
 
-> 把 [Hermes](https://github.com/tanmengxuan/Hermes) 的飞书回复从「纯文本」升级为「**可原地更新的交互卡片**」——过程消息一条不丢，回复秒变任务看板。
+> 把 [Hermes](https://github.com/NousResearch/hermes-agent) 的飞书回复从「纯文本」升级为「**可原地更新的交互卡片**」——过程消息一条不丢，回复秒变任务看板。
 >
 > Field-tested upgrade for Hermes: interactive cards (JSON 2.0), PATCH in-place updates with the same message_id, and every tool-progress message preserved — all pitfalls documented.
 
