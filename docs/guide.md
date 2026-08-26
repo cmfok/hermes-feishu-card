@@ -212,6 +212,32 @@ hermes gateway restart
 - [ ] 没有消息"闪一下消失"。No message disappears.
 - [ ] 下一轮对话是**新卡片**(旧卡保留)。Next turn starts a new card, the old one is kept.
 
+### 步骤 10:容量保护(可选增强) / Capacity guard (optional enhancement, 2026-08-26)
+
+> **解决的问题 / The problem**:同一张卡无限追加,迟早触达飞书 interactive 请求体上限 **30KB** / JSON 2.0 元素上限 **200**。PATCH 被 API 拒绝(11310/11325/230025)后 fallback 发新卡,但新卡只带当前这条消息——**旧内容全部"断掉"**。Unbounded card growth hits Feishu's 30KB interactive payload / 200-element limits — PATCH gets rejected and the fallback card loses all old content.
+
+在 `send()` 追加分支前加容量检查,任一超限 → **主动发新卡**(旧卡保留)。Guard before appending — any limit reached starts a new card and keeps the old one:
+
+```python
+# 类常量(阈值可调):追加次数 / 块数 / 整卡 JSON UTF-8 字节数
+_CARD_MAX_APPENDS = 30
+_CARD_MAX_BLOCKS = 60
+_CARD_MAX_BYTES = 15000
+
+# send():超限 → 不走追加分支,直接发新卡
+if existing_card and isinstance(existing_card, dict) and existing_card.get("message_id"):
+    if (
+        existing_card.get("append_count", 0) >= FeishuAdapter._CARD_MAX_APPENDS
+        or len(existing_card.get("blocks", [])) >= FeishuAdapter._CARD_MAX_BLOCKS
+        or len(str(existing_card.get("content", "")).encode("utf-8")) >= FeishuAdapter._CARD_MAX_BYTES
+    ):
+        existing_card = None   # 主动翻新卡,旧卡保留
+    else:
+        # ...原有追加逻辑
+```
+
+> 新卡记录 `append_count = 1`,每次追加 +1。Track `append_count` on the card dict (1 on new card, +1 per append). 阈值按需调整。Tune the thresholds to taste.
+
 ---
 
 ## 四、配套脚本 / Companion Scripts
@@ -262,6 +288,7 @@ python apply_feishu_card_patch.py
 | 重启后旧卡内容被改 | 映射持久化,重启后拿旧 content 覆盖旧卡 | 映射改**纯内存**,重启一律发新卡(步骤 5) |
 | gateway 无法从内部重启 | Hermes 安全机制 | 外部 shell 执行或飞书发 `/restart` |
 | 收到卡片但消息分块成多张 | 长回复超过 8000 字符被 truncate 分块 | 正常行为;同一轮内分块会追加到同一张卡(步骤 5 保证) |
+| 卡片太长后旧内容"断掉" | 同一张卡无限追加,触达飞书 interactive 请求体上限 **30KB** / JSON 2.0 元素上限 **200** 后 PATCH 被 API 拒绝(11310/11325/230025),fallback 发新卡但只带当前消息 | **容量保护**(步骤 10):追加次数 ≥30 / 块数 ≥60 / 字节数 ≥15000 任一超限 → 主动开新卡(旧卡保留) |
 
 ---
 

@@ -9,6 +9,7 @@
 1. 所有出站回复 → JSON 2.0 交互卡片(支持表格)
 2. 回退链 interactive → post → text
 3. 会话内"单卡片持续更新":chat_id → message_id 映射,每轮回复 PATCH 原地更新
+4. 容量保护:同一张卡追加 ≥30 次 → 主动开新卡(2026-08-26,防卡片触达 30KB 上限断旧信息)
 
 检测:adapter.py 的 _build_outbound_payload 是否含 "schema": "2.0"(已打补丁特征)。
 备份:每次应用前自动生成 adapter.py.bak-feishu-card-<时间戳>。
@@ -122,17 +123,23 @@ NEW_SEND_HEAD = '''        formatted = self.format_message(content)
         # 卡片回复模式:该会话已有卡片 → PATCH 追加更新(不覆盖),不重复发新卡
         existing_card = self._chat_card_map.get(chat_id)
         if existing_card and isinstance(existing_card, dict) and existing_card.get("message_id"):
-            try:
-                # 同一轮内多次输出 → 追加到同一张卡片(不覆盖旧内容)
-                new_content = str(existing_card.get("content", "")) + "\\n\\n" + formatted
-                result = await self.edit_message(chat_id, existing_card["message_id"], new_content)
-                if result.success:
-                    existing_card["content"] = new_content
-                    self._save_chat_card_map()
-                    return result
-                logger.warning("[Feishu] Card update failed (%s); sending a new card", result.error)
-            except Exception as exc:
-                logger.warning("[Feishu] Card update error: %s; sending a new card", exc)
+            if existing_card.get("append_count", 0) >= 30:
+                # 容量保护:同一张卡追加超过 30 次 → 主动发新卡,
+                # 避免卡片触达飞书 30KB 上限后 PATCH 失败、旧内容丢失。
+                existing_card = None
+            else:
+                try:
+                    # 同一轮内多次输出 → 追加到同一张卡片(不覆盖旧内容)
+                    new_content = str(existing_card.get("content", "")) + "\\n\\n" + formatted
+                    result = await self.edit_message(chat_id, existing_card["message_id"], new_content)
+                    if result.success:
+                        existing_card["content"] = new_content
+                        existing_card["append_count"] = existing_card.get("append_count", 0) + 1
+                        self._save_chat_card_map()
+                        return result
+                    logger.warning("[Feishu] Card update failed (%s); sending a new card", result.error)
+                except Exception as exc:
+                    logger.warning("[Feishu] Card update error: %s; sending a new card", exc)
         chunks = self.truncate_message(formatted, self.MAX_MESSAGE_LENGTH)'''
 
 # ---- 补丁 6:send() 结尾 — 记录新卡 message_id ----
@@ -140,7 +147,7 @@ OLD_SEND_TAIL = '''            return self._finalize_send_result(last_response, 
 
 NEW_SEND_TAIL = '''            result = self._finalize_send_result(last_response, "send failed")
             if result.success and result.message_id:
-                self._chat_card_map[chat_id] = {"message_id": result.message_id, "content": formatted}
+                self._chat_card_map[chat_id] = {"message_id": result.message_id, "content": formatted, "append_count": 1}
                 self._save_chat_card_map()
             return result'''
 
