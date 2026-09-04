@@ -29,10 +29,15 @@ hermes-feishu-card/
 ├── scripts/
 │   ├── feishu_card.py         # 手动发送/原地更新卡片工具（零依赖，仅标准库）
 │   └── apply_feishu_card_patch.py  # 一键重打补丁（幂等，hermes update 后恢复用）
+├── custom/
+│   ├── feishu-adapter-full-20260826.py  # 完整定制版 adapter（生产验证，整体替换）
+│   └── README.md              # 完整版 vs 补丁版对比 + 安装步骤
 ├── SECURITY.md                # 安全漏洞报告
 ├── CHANGELOG.md               # 变更记录
 └── README.md
 ```
+
+> **补丁版还是完整版？** `scripts/` 的补丁脚本 = 轻量恢复（官方 adapter + 9 处锚点补丁）；`custom/` 的完整版 = 整体替换（含密封定时器、工具块排版、完整容量保护，长对话体验最佳）。生产环境推荐完整版，见 [`custom/README.md`](custom/README.md)。
 
 ## 🚀 快速开始 / Quick Start
 
@@ -68,7 +73,7 @@ python scripts/feishu_card.py update <message_id> --status 进行中
 
 ## ⚠️ 注意 / Notes
 
-- `hermes update` 会覆盖 `adapter.py`，卡片功能失效 → 重跑 `apply_feishu_card_patch.py` 即可恢复。The patch script is idempotent and auto-backs up `adapter.py.bak-feishu-card-<timestamp>` before each apply.
+- `hermes update` 会覆盖 `adapter.py`，卡片功能失效 → 重跑 `apply_feishu_card_patch.py` 即可恢复；或直接整体替换为 [`custom/feishu-adapter-full-20260826.py`](custom/)（完整版，推荐）。The patch script is idempotent and auto-backs up `adapter.py.bak-feishu-card-<timestamp>` before each apply; the full custom adapter in `custom/` is the production-preferred drop-in replacement.
 - 补丁针对 Hermes 的 `plugins/platforms/feishu/adapter.py`，Hermes 版本升级后若补丁匹配失败，脚本会提示人工检查。If a Hermes update changes the adapter code, the script reports exactly which patch didn't match for manual review.
 
 ## 🐛 常见问题 / Known Issues（全部踩过）
