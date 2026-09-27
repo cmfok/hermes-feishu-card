@@ -1,0 +1,16 @@
+- ⏳ · terminal · `cd /p/Qoder/work && ls -la && date "+%Y-%m-%d %H:%M %A"`
+- ⏳ · search_files · `分享会|分享课|分享主题`
+- ⏳ · terminal · `cd /p/Qoder/work/分享会 && ls -la --time-style=long-iso && echo "=== AIAGENT分享 ===" && ls ...`
+- ⏳ · search_files · `周四|星期四|9月18|09-18|09/18`
+- ⏳ · read_file · `P:\Qoder\work\memories\work-0cd8e837f8085c1a\memory\qingjunhui-course-plan.md`
+- ⏳ · terminal · `cd /p/Qoder/work/memories/work-0cd8e837f8085c1a/memory && ls -la --time-style=long-iso ...`
+- ⏳ · terminal · `cd /p/Qoder/work/Ai100 && find . -type f -newermt "2026-09-01" ! -path "*/.git/*" ! -pa...`
+- ⏳ · search_files · `分享会|沙龙|线下分享|分享嘉宾|分享主题`
+- ⏳ · tool_describe · `session_search`
+- ⏳ · terminal · `cd /p/Qoder/work/Ai100 && ls -la --time-style=long-iso obsidian/ && echo "=== 我的想法 ==="...`
+- ⏳ · tool_call · `session_search`
+- ⏳ · terminal · `cd /p/Qoder/work/Ai100/obsidian && ls -la --time-style=long-iso 项目进度/ && echo "=== grep...`
+- ⏳ · read_file · `P:\Qoder\work\Ai100\obsidian\社交\青骏会\AI兴趣小组-小型分享会-运行SOP.md`
+- ⏳ · read_file · `P:\Qoder\work\Ai100\obsidian\社交\青骏会\AI分享系列策划-多智能体实战营-2026-09-14.md`
+- ⏳ · read_file · `P:\Qoder\work\Ai100\obsidian\_hots.md`
+- ⏳ · read_file · `P:\Qoder\work\Ai100\obsidian\项目进度\待办清单.md`

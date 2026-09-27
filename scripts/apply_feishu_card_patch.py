@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """飞书卡片回复补丁 — 重打脚本(幂等)。
 
+⚠️ LEGACY（2026-09-14 起不推荐）：现在建议用插件版 `plugin/feishu-card/`
+（`install-plugin.ps1`）——插件不改官方 adapter.py，hermes update 也不会冲掉它，
+并且带卡片调用硬超时（旧的 PATCH 无超时会一次挂起永久卡死，2026-09-13 实翻车）。
+本脚本保留给"老版本 Hermes / 必须手工改官方文件"的场景。
+
 用途:hermes update 后 adapter.py 会被官方版本覆盖,飞书卡片回复功能会失效。
 运行本脚本即可重新应用补丁:
     python apply_feishu_card_patch.py

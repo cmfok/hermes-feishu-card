@@ -8,6 +8,31 @@
 
 ---
 
+## 🆕 v2.0 插件版（2026-09-14，**推荐**）
+
+**从"改官方 adapter.py"改为"插件覆盖内置适配器"** —— 不再 fork 官方文件，
+`hermes update` 覆盖官方代码也不再影响卡片功能。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File plugin\install-plugin.ps1 -Restart
+```
+
+| | 旧方式（补丁 / 整体替换） | **v2.0 插件版** |
+|:--|:--|:--|
+| 改官方文件 | 要（每次 update 重打补丁） | **不用**（同名平台注册，后写胜出） |
+| 自己要维护的代码 | 6000+ 行整文件 | **约 500 行**（只覆盖出站卡片） |
+| 卡片 PATCH 超时 | ❌ 无 → 一次挂起永久卡死（2026-09-13 实翻车） | ✅ 15s 硬超时 + 失败换卡 + 纯文本兜底 |
+| 卡片状态 | 三个 dict、四条路径各自改 | **单写者状态机**（每会话一个 session，带 seq） |
+| 回退 | 还原备份文件 | 删一行配置 / 环境变量 `HERMES_FEISHU_CARD_MODE=0` |
+
+细节见 [`plugin/feishu-card/README.md`](plugin/feishu-card/README.md)，
+改造方案与事故复盘见 [`docs/refactor-plan-20260914.md`](docs/refactor-plan-20260914.md)。
+
+> 下面的"9 步升级指南 + 补丁脚本"仍然可用（老版本 Hermes / 想手工改官方文件的场景），
+> 但新装一律建议用插件版。The patch-script route below still works but is legacy — prefer the plugin.
+
+---
+
 ## ✨ 升级后是什么效果 / What Changed
 
 | 场景 | 升级前（默认配置） | 升级后 |
@@ -25,7 +50,10 @@
 
 ```
 hermes-feishu-card/
+├── docs/maintenance.md        # ⭐⭐ 维护与技术手册（架构/机制/上游耦合点/踩坑全表/维护流程/排障）—— 改代码前必读
+├── docs/requirements.md       # ⭐ CM 的需求与验收清单（R1–R7，照抄原话 + 验收方式）—— 改完逐条打勾
 ├── docs/guide.md              # 升级指南（9 步教程+避坑表+验证清单）
+├── plugin/feishu-card/tests/snapshot_card.py  # ⭐ 卡片内容快照（改前/改后逐行比对，--check 作门禁）
 ├── scripts/
 │   ├── feishu_card.py         # 手动发送/原地更新卡片工具（零依赖，仅标准库）
 │   └── apply_feishu_card_patch.py  # 一键重打补丁（幂等，hermes update 后恢复用）

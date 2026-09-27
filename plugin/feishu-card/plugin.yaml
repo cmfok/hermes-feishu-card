@@ -1,0 +1,12 @@
+name: feishu-card
+label: Feishu Card Mode
+kind: platform
+version: 1.0.0
+description: >
+  Turn Hermes' Feishu outbound into in-place updated interactive cards:
+  a single-writer card session state machine, hard timeouts on every card
+  API call, capacity-aware card rotation, and preserved tool-progress blocks.
+  Registers the platform name "feishu" to override the bundled adapter
+  (platform_registry is last-writer-wins); inbound/protocol behaviour is
+  inherited from the official adapter untouched.
+author: CM

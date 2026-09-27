@@ -17,6 +17,32 @@ source: "实战验证(2026-08-04)"
 
 ---
 
+## 🆕 0. 推荐路线：插件版（v2.0，2026-09-14） / Recommended: the plugin
+
+**不要再手工改官方 `adapter.py` 了**——现在有插件版：一个同名平台注册覆盖内置 feishu 适配器，
+`hermes update` 覆盖官方代码也不影响它，且卡片 API 调用带 **15s 硬超时 + 失败换卡**
+（旧的手工版没有超时，一次 PATCH 挂起就会永久卡死整轮，2026-09-13 实际翻车）。
+
+```powershell
+# 装到默认 profile（或 -Profile feishu2 / basketball）
+powershell -ExecutionPolicy Bypass -File plugin\install-plugin.ps1 -Restart
+```
+
+**3 步 vs 下面 9 步**：插件版 = 复制插件目录 → 在 `config.yaml` 的 `plugins.enabled` 加 `feishu-card` → 重启网关（安装器全自动）。
+回退同样简单：删掉那一行配置，或设 `HERMES_FEISHU_CARD_MODE=0`。
+
+| | 下面的手工路线（第 1-10 步） | 插件版（推荐） |
+|:--|:--|:--|
+| 改官方文件 | 要（每次 update 重打补丁） | 不用 |
+| 自己要维护的代码 | 6000+ 行整文件 | 约 500 行出站层 |
+| 卡片 PATCH 超时 | ❌ 无 | ✅ 15s + 失败换卡 + 纯文本兜底 |
+| 卡片状态 | 三个 dict、四条路径各自改 | 单写者状态机（每会话一个 session） |
+
+细节：`plugin/feishu-card/README.md`；改造方案与事故复盘：`docs/refactor-plan-20260914.md`。
+下面的 9 步流程保留，供"老版本 Hermes / 必须手工改官方文件"的场景使用。
+
+---
+
 ## 一、升级后是什么效果 / What It Looks Like After
 
 | 场景 | 升级前（默认配置） | 升级后 |
